@@ -1,6 +1,6 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ClockIcon, UserIcon, HeartIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, UserIcon, HeartIcon, CalendarIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 // 模拟攻略详细数据
 const guideData = {
@@ -157,6 +157,15 @@ const GuideDetail = () => {
                   <span>{guide.likes}</span>
                 </div>
               </div>
+              <div className="mt-6">
+                <Link
+                  to={`/guides/edit/${guide.id}`}
+                  className="inline-flex items-center bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-full transition-colors"
+                >
+                  <PencilIcon className="h-5 w-5 mr-2" />
+                  编辑攻略
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -173,7 +182,7 @@ const GuideDetail = () => {
             className="lg:col-span-2"
           >
             {guide.content.map((section, index) => (
-              <div key={index} className="mb-12">
+              <div key={index} id={`section-${index}`} className="mb-12">
                 <h2 className="text-3xl font-bold mb-6">{section.title}</h2>
                 <div className="prose prose-lg max-w-none">
                   {section.content.split('\n').map((paragraph, i) => (

@@ -7,6 +7,8 @@ import Destinations from './pages/Destinations';
 import DestinationDetail from './pages/DestinationDetail';
 import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
+import GuideEditor from './pages/GuideEditor';
+import NewGuide from './pages/NewGuide';
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ function App() {
               <Route path="/destinations/:id" element={<DestinationDetail />} />
               <Route path="/guides" element={<Guides />} />
               <Route path="/guides/:id" element={<GuideDetail />} />
+              <Route path="/guides/edit/:id" element={<GuideEditor />} />
+              <Route path="/guides/new" element={<NewGuide />} />
             </Routes>
           </main>
           <Footer />

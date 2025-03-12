@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ClockIcon, UserIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, UserIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const guides = [
   {
@@ -88,7 +88,16 @@ const Guides = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-center mb-8">旅游攻略</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">旅游攻略</h1>
+          <Link
+            to="/guides/new"
+            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            创建攻略
+          </Link>
+        </div>
 
         {/* Search and Filter */}
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -161,13 +170,21 @@ const Guides = () => {
                     </h2>
                   </Link>
                   <p className="text-gray-600 mb-4 flex-grow">{guide.excerpt}</p>
-                  <div className="flex items-center text-gray-500 text-sm">
-                    <UserIcon className="h-4 w-4 mr-1" />
-                    <span className="mr-4">{guide.author}</span>
-                    <ClockIcon className="h-4 w-4 mr-1" />
-                    <span className="mr-4">{guide.readTime}</span>
-                    <HeartIcon className="h-4 w-4 mr-1" />
-                    <span>{guide.likes}</span>
+                  <div className="flex items-center justify-between text-gray-500 text-sm">
+                    <div className="flex items-center">
+                      <UserIcon className="h-4 w-4 mr-1" />
+                      <span className="mr-4">{guide.author}</span>
+                      <ClockIcon className="h-4 w-4 mr-1" />
+                      <span className="mr-4">{guide.readTime}</span>
+                      <HeartIcon className="h-4 w-4 mr-1" />
+                      <span>{guide.likes}</span>
+                    </div>
+                    <Link
+                      to={`/guides/edit/${guide.id}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      编辑
+                    </Link>
                   </div>
                 </div>
               </div>

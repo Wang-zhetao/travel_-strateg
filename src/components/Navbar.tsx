@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link, useLocation } from 'react-router-dom';
+import { Bars3Icon, XMarkIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { name: '首页', path: '/' },
@@ -27,11 +28,22 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === link.path
+                    ? 'text-blue-600'
+                    : 'text-gray-700 hover:text-blue-600'
+                }`}
               >
                 {link.name}
               </Link>
             ))}
+            <Link
+              to="/guides/new"
+              className="flex items-center bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <PencilIcon className="h-4 w-4 mr-1" />
+              创建攻略
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -58,12 +70,24 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium"
+                className={`block px-3 py-2 text-base font-medium ${
+                  location.pathname === link.path
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}
               </Link>
             ))}
+            <Link
+              to="/guides/new"
+              className="flex items-center text-blue-600 px-3 py-2 text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              <PencilIcon className="h-5 w-5 mr-1" />
+              创建攻略
+            </Link>
           </div>
         </div>
       )}
