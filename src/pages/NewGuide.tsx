@@ -1,3 +1,4 @@
+import MarkdownEditor from '../components/MarkdownEditor';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -944,4 +945,4 @@ const NewGuide = () => {
   );
 };
 
-export default NewGuide; 
+export default NewGuide;
