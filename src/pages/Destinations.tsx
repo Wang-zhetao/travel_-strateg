@@ -67,66 +67,74 @@ const Destinations = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-16">
       <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-center mb-8">探索目的地</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-12">
+          <span className="inline-block border-b-4 border-blue-500 pb-2">探索目的地</span>
+        </h1>
         
         {/* Search and Filter */}
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <div className="flex space-x-4 overflow-x-auto pb-2">
+        <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0 bg-white p-6 rounded-xl shadow-md">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
                   selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                } transition-colors`}
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                }`}
               >
                 {category}
               </button>
             ))}
           </div>
-          <input
-            type="text"
-            placeholder="搜索目的地或国家..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative w-full md:w-64">
+            <input
+              type="text"
+              placeholder="搜索目的地或国家..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pl-10"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 absolute left-3 top-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </div>
         </div>
 
         {/* Destinations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredDestinations.map((destination) => (
             <motion.div
               key={destination.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              whileHover={{ y: -10 }}
-              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              transition={{ duration: 0.3 }}
+              whileHover={{ y: -10, transition: { duration: 0.2 } }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl flex flex-col h-full"
             >
-              <div className="relative h-48">
+              <div className="relative h-56 overflow-hidden group">
                 <img
                   src={destination.image}
                   alt={destination.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg shadow-md text-sm font-medium">
                   {destination.category}
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-xl font-semibold">{destination.name}</h2>
-                  <span className="text-gray-600">{destination.country}</span>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-3">
+                  <h2 className="text-xl font-bold text-gray-800">{destination.name}</h2>
+                  <span className="text-blue-600 font-medium text-sm bg-blue-50 px-2 py-1 rounded">{destination.country}</span>
                 </div>
-                <p className="text-gray-600 mb-4">{destination.description}</p>
+                <p className="text-gray-600 mb-4 flex-grow">{destination.description}</p>
                 <Link
                   to={`/destinations/${destination.id}`}
-                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-block bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-transform duration-300 w-full"
                 >
                   查看详情
                 </Link>
@@ -136,8 +144,17 @@ const Destinations = () => {
         </div>
 
         {filteredDestinations.length === 0 && (
-          <div className="text-center text-gray-600 py-12">
-            没有找到符合条件的目的地
+          <div className="text-center bg-white p-12 rounded-xl shadow-md mt-8">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-gray-600 text-lg font-medium">没有找到符合条件的目的地</p>
+            <button 
+              onClick={() => { setSelectedCategory('全部'); setSearchTerm(''); }}
+              className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+            >
+              重置搜索
+            </button>
           </div>
         )}
       </div>
@@ -145,4 +162,4 @@ const Destinations = () => {
   );
 };
 
-export default Destinations; 
+export default Destinations;
