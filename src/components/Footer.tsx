@@ -5,7 +5,6 @@ const Footer = () => {
 
   const footerLinks = {
     关于我们: [
-      { name: '公司介绍', path: '/about' },
       { name: '联系我们', path: '/contact' },
       { name: '加入我们', path: '/careers' },
     ],
