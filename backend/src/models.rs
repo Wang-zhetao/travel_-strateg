@@ -46,3 +46,24 @@ pub struct UpdateGuideRequest {
     pub tags: Option<Vec<String>>,
     pub content: Option<Vec<Section>>,
 }
+
+// AI聊天请求
+#[derive(Debug, Deserialize)]
+pub struct ChatRequest {
+    pub message: String,
+    pub history: Option<Vec<ChatMessage>>,
+}
+
+// 聊天消息
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ChatMessage {
+    pub role: String,  // "user" 或 "assistant"
+    pub content: String,
+}
+
+// AI聊天响应
+#[derive(Debug, Serialize)]
+pub struct ChatResponse {
+    pub message: String,
+    pub created_at: DateTime<Utc>,
+}

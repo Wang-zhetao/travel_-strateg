@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, PencilIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +10,7 @@ const Navbar = () => {
     { name: '首页', path: '/' },
     { name: '目的地', path: '/destinations' },
     { name: '旅游攻略', path: '/guides' },
+    { name: 'AI助手', path: '/chat' },
   ];
 
   return (
@@ -34,7 +35,14 @@ const Navbar = () => {
                     : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
-                {link.name}
+                {link.path === '/chat' ? (
+                  <div className="flex items-center">
+                    <ChatBubbleLeftRightIcon className="h-4 w-4 mr-1" />
+                    {link.name}
+                  </div>
+                ) : (
+                  link.name
+                )}
               </Link>
             ))}
             <Link
@@ -77,7 +85,14 @@ const Navbar = () => {
                 }`}
                 onClick={() => setIsOpen(false)}
               >
-                {link.name}
+                {link.path === '/chat' ? (
+                  <div className="flex items-center">
+                    <ChatBubbleLeftRightIcon className="h-5 w-5 mr-1" />
+                    {link.name}
+                  </div>
+                ) : (
+                  link.name
+                )}
               </Link>
             ))}
             <Link
@@ -95,4 +110,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

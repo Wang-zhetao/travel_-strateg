@@ -2,11 +2,19 @@ use warp::{Filter, filters::BoxedFilter, Reply};
 use uuid::Uuid;
 
 use crate::handlers;
-use crate::models::{CreateGuideRequest, UpdateGuideRequest};
+use crate::models::{CreateGuideRequest, UpdateGuideRequest, ChatRequest};
 use crate::error::handle_rejection;
 
 // 路由根路径
 const API_PATH: &str = "api";
+
+// 组合所有API相关的路由
+pub fn routes() -> BoxedFilter<(impl Reply,)> {
+    guide_routes()
+        .or(chat_routes())
+        .recover(handle_rejection)
+        .boxed()
+}
 
 // 组合所有攻略相关的路由
 pub fn guide_routes() -> BoxedFilter<(impl Reply,)> {
@@ -15,6 +23,13 @@ pub fn guide_routes() -> BoxedFilter<(impl Reply,)> {
         .or(create_guide())
         .or(update_guide())
         .or(delete_guide())
+        .recover(handle_rejection)
+        .boxed()
+}
+
+// 聊天相关的路由
+pub fn chat_routes() -> BoxedFilter<(impl Reply,)> {
+    chat_with_deepseek()
         .recover(handle_rejection)
         .boxed()
 }
@@ -66,6 +81,17 @@ fn delete_guide() -> BoxedFilter<(impl Reply,)> {
         .and(warp::path::param::<Uuid>())
         .and(warp::delete())
         .and_then(handlers::delete_guide)
+        .boxed()
+}
+
+// 使用DeepSeek进行聊天
+fn chat_with_deepseek() -> BoxedFilter<(impl Reply,)> {
+    warp::path(API_PATH)
+        .and(warp::path("chat"))
+        .and(warp::path("deepseek"))
+        .and(warp::post())
+        .and(json_body::<ChatRequest>())
+        .and_then(handlers::chat_with_deepseek)
         .boxed()
 }
 

@@ -17,6 +17,11 @@ pub enum Error {
 
 impl Reject for Error {}
 
+// 
+pub fn internal_error() -> Error {
+    Error::InternalServerError("Internal server error".to_string())
+}
+
 pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     let (code, message) = if err.is_not_found() {
         (StatusCode::NOT_FOUND, "Not Found".to_string())

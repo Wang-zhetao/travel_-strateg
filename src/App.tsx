@@ -9,6 +9,7 @@ import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
 import GuideEditor from './pages/GuideEditor';
 import NewGuide from './pages/NewGuide';
+import AIChat from './pages/AIChat';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ function App() {
               <Route path="/guides/:id" element={<GuideDetail />} />
               <Route path="/guides/edit/:id" element={<GuideEditor />} />
               <Route path="/guides/new" element={<NewGuide />} />
+              <Route path="/chat" element={<AIChat />} />
             </Routes>
           </main>
           <Footer />
