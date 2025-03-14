@@ -1,11 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ClockIcon, UserIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
 
-const guides = [
+// 定义攻略的接口类型
+interface Guide {
+  id: string;
+  title: string;
+  author?: string; // 可选字段
+  date?: string; // 可选字段
+  readTime?: string; // 可选字段
+  likes?: number; // 可选字段
+  image?: string; // 兼容旧数据
+  mainImage?: string; // 后端实际字段名
+  excerpt?: string;
+  tags: string[];
+  created_at?: string;
+  updated_at?: string;
+  content?: any[];
+  isNew?: boolean; // 新增字段，标记是否为新发布的攻略
+  highlighted?: boolean; // 新增字段，标记是否为新发布的攻略
+}
+
+// 原硬编码数据保留作为备用，如果API请求失败时显示
+const fallbackGuides = [
   {
-    id: 1,
+    id: '1',
     title: '巴厘岛完全攻略：10天深度游',
     author: '旅行达人',
     date: '2024-03-01',
@@ -16,7 +36,7 @@ const guides = [
     tags: ['海岛', '美食', '文化'],
   },
   {
-    id: 2,
+    id: '2',
     title: '北海道自由行：最佳行程规划',
     author: '美食家',
     date: '2024-02-28',
@@ -27,7 +47,7 @@ const guides = [
     tags: ['自然', '美食', '温泉'],
   },
   {
-    id: 3,
+    id: '3',
     title: '圣托里尼深度游：悬崖酒店体验',
     author: '摄影师',
     date: '2024-02-25',
@@ -38,7 +58,7 @@ const guides = [
     tags: ['浪漫', '美景', '酒店'],
   },
   {
-    id: 4,
+    id: '4',
     title: '京都赏樱攻略：最佳观赏地点',
     author: '文化达人',
     date: '2024-02-20',
@@ -49,7 +69,7 @@ const guides = [
     tags: ['文化', '赏樱', '古迹'],
   },
   {
-    id: 5,
+    id: '5',
     title: '马尔代夫水上屋全攻略',
     author: '奢旅专家',
     date: '2024-02-15',
@@ -60,7 +80,7 @@ const guides = [
     tags: ['海岛', '奢华', '度假'],
   },
   {
-    id: 6,
+    id: '6',
     title: '巴黎艺术之旅：博物馆与画廊',
     author: '艺术爱好者',
     date: '2024-02-10',
@@ -72,16 +92,83 @@ const guides = [
   },
 ];
 
-const allTags = Array.from(new Set(guides.flatMap(guide => guide.tags)));
-
 const Guides = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const newGuideId = searchParams.get('new');
+  
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState('全部');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  //攻略列表的引用
+  const guideRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // 从后端API获取攻略数据
+  useEffect(() => {
+    const fetchGuides = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8080/api/guides');
+        
+        if (!response.ok) {
+          throw new Error(`获取数据失败，状态码: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('获取到的攻略数据:', data);
+        
+        // 转换API返回的数据格式以匹配UI组件需要的格式
+        const formattedApiData = data.map((guide: any) => ({
+          ...guide,
+          image: guide.mainImage, // 将mainImage复制到image字段供UI使用
+          likes: guide.likes || 0,
+          author: guide.author || '匿名用户',
+          readTime: guide.readTime || '5分钟',
+          date: guide.date || new Date(guide.created_at).toLocaleDateString('zh-CN'),
+          excerpt: guide.excerpt || guide.title + '的精彩内容...',
+          isNew: true, // 标记是否为新发布的攻略
+          highlighted: guide.id === newGuideId, // 标记是否为新发布的攻略
+        }));
+        
+        // 将格式化后的后端数据和备用数据合并
+        const combinedGuides = [...formattedApiData, ...fallbackGuides];
+        setGuides(combinedGuides);
+        setError(null);
+      } catch (err) {
+        console.error('获取攻略数据失败:', err);
+        setError('获取攻略数据失败，请刷新页面重试');
+        // 如果API请求失败，使用备用数据
+        setGuides(fallbackGuides);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGuides();
+  }, [newGuideId]);
+  
+  // 当页面加载完成后，如果有新发布的攻略，滚动到该攻略
+  useEffect(() => {
+    if (!loading && newGuideId && guideRefs.current[newGuideId]) {
+      setTimeout(() => {
+        guideRefs.current[newGuideId]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 500); // 等待0.5秒后滚动到新发布的攻略
+    }
+  }, [loading, newGuideId, guides]);
+
+  // 计算所有标签，用于过滤
+  const allTags = Array.from(new Set(guides.flatMap(guide => guide.tags)));
 
   const filteredGuides = guides.filter(guide => {
     const matchesTag = selectedTag === '全部' || guide.tags.includes(selectedTag);
     const matchesSearch = guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guide.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+      (guide.excerpt && guide.excerpt.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesTag && matchesSearch;
   });
 
@@ -142,78 +229,131 @@ const Guides = () => {
           </div>
         </div>
 
-        {/* Guides Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredGuides.map(guide => (
-            <motion.div
-              key={guide.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              whileHover={{ y: -10 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl flex flex-col h-full"
-            >
-              <div className="relative">
-                <img
-                  src={guide.image}
-                  alt={guide.title}
-                  className="h-64 w-full object-cover"
-                />
-                <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-4 rounded-lg shadow-md">
-                  <div className="flex items-center">
-                    <HeartIcon className="h-4 w-4 mr-1" />
-                    <span>{guide.likes}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {guide.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-full font-medium"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <Link to={`/guides/${guide.id}`} className="block group">
-                  <h2 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors">
-                    {guide.title}
-                  </h2>
-                </Link>
-                <p className="text-gray-600 mb-4 flex-grow">{guide.excerpt}</p>
-                <div className="flex items-center justify-between text-gray-500 text-sm mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-center">
-                    <UserIcon className="h-4 w-4 mr-1" />
-                    <span className="mr-4 text-gray-700 font-medium">{guide.author}</span>
-                    <ClockIcon className="h-4 w-4 mr-1" />
-                    <span>{guide.readTime}</span>
-                  </div>
-                  <Link
-                    to={`/guides/edit/${guide.id}`}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    编辑
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-16">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        )}
 
-        {filteredGuides.length === 0 && (
-          <div className="text-center bg-white p-12 rounded-xl shadow-md mt-8">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-gray-600 text-lg font-medium">没有找到符合条件的攻略</p>
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-16">
+            <p className="text-red-500 mb-4">{error}</p>
             <button 
-              onClick={() => { setSelectedTag('全部'); setSearchTerm(''); }}
-              className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              重置搜索
+              刷新页面
             </button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && filteredGuides.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-gray-500 text-xl mb-4">暂无攻略内容</p>
+            <Link 
+              to="/guides/new" 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              创建第一篇攻略
+            </Link>
+          </div>
+        )}
+
+        {/* Guides Grid */}
+        {!loading && !error && filteredGuides.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredGuides.map(guide => (
+              <motion.div
+                key={guide.id}
+                ref={(el) => { guideRefs.current[guide.id] = el; }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: guide.highlighted ? [1, 1.05, 1] : 1,
+                }}
+                transition={{
+                  duration: 0.3,
+                  scale: guide.highlighted ? {
+                    duration: 0.8,
+                    repeat: 2,
+                    repeatType: 'reverse'
+                  } : undefined
+                }}
+                whileHover={{ y: -10 }}
+                className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl flex flex-col h-full ${
+                  guide.highlighted 
+                    ? 'ring-4 ring-blue-500 ring-offset-4' 
+                    : guide.isNew 
+                      ? 'ring-2 ring-blue-500 ring-offset-2' 
+                      : ''
+                }`}
+              >
+                <div className="relative">
+                  <img
+                    src={guide.image || guide.mainImage} // 优先使用image，如果没有则使用mainImage
+                    alt={guide.title}
+                    className="h-64 w-full object-cover"
+                    onError={(e) => {
+                      console.error('图片加载失败:', guide.image || guide.mainImage);
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width="800" height="400" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="800" height="400" fill="%23f5f5f5"%3E%3C/rect%3E%3Cg%3E%3Ctext x="50%" y="50%" font-family="Arial" font-size="24" text-anchor="middle" fill="%23999"%3E图片加载失败%3C/text%3E%3C/g%3E%3C/svg%3E';
+                    }}
+                  />
+                  <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-4 rounded-lg shadow-md">
+                    <div className="flex items-center">
+                      <HeartIcon className="h-4 w-4 mr-1" />
+                      <span>{guide.likes || 0}</span>
+                    </div>
+                  </div>
+                  {guide.isNew && (
+                    <div className="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 m-4 rounded-lg shadow-md">
+                      <span className="flex items-center">
+                        <span className="mr-1">新</span>
+                        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {guide.tags.map(tag => (
+                      <span
+                        key={tag}
+                        className="bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-full font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <Link to={`/guides/${guide.id}`} className="block group">
+                    <h2 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors">
+                      {guide.title}
+                    </h2>
+                  </Link>
+                  <p className="text-gray-600 mb-4 flex-grow">{guide.excerpt || guide.title}</p>
+                  <div className="flex items-center justify-between text-gray-500 text-sm mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center">
+                      <UserIcon className="h-4 w-4 mr-1" />
+                      <span className="mr-4 text-gray-700 font-medium">{guide.author || '匿名用户'}</span>
+                      <ClockIcon className="h-4 w-4 mr-1" />
+                      <span>{guide.readTime || '5分钟'}</span>
+                    </div>
+                    <Link
+                      to={`/guides/edit/${guide.id}`}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      编辑
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
       </div>

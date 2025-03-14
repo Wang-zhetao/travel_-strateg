@@ -1,4 +1,3 @@
-import MarkdownEditor from '../components/MarkdownEditor';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -17,7 +16,10 @@ import {
   TableCellsIcon,
   CodeBracketIcon,
   ListBulletIcon,
-  HashtagIcon
+  HashtagIcon,
+  PencilSquareIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
 const NewGuide = () => {
@@ -47,8 +49,17 @@ const NewGuide = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGuide({ ...guide, mainImage: e.target.value });
-    setPreviewImage(e.target.value);
+    // 获取输入的 URL
+    const url = e.target.value;
+    
+    // 确保 URL 有协议前缀
+    let formattedUrl = url;
+    if (url && url.trim() !== '' && !url.match(/^https?:\/\//)) {
+      formattedUrl = `https://${url}`;
+    }
+    
+    setGuide({ ...guide, mainImage: formattedUrl });
+    setPreviewImage(formattedUrl);
   };
 
   const handleTagToggle = (tag: string) => {
@@ -133,8 +144,11 @@ const NewGuide = () => {
       const data = await response.json();
       console.log('攻略保存成功:', data);
       
-      // 保存成功后跳转到攻略列表页
-      navigate('/guides');
+      // 显示成功提示
+      alert('攻略已成功保存！正在返回攻略列表页...');
+      
+      // 保存成功后跳转到攻略列表页，并添加参数以突出显示新创建的攻略
+      navigate(`/guides?new=${data.id}`, { replace: true });
     } catch (error) {
       console.error('保存攻略失败:', error);
       alert('保存攻略失败，请稍后重试');
@@ -254,22 +268,28 @@ const NewGuide = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
-      <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white rounded-xl shadow-xl overflow-hidden"
-        >
-          {/* 顶部进度条 */}
-          <div className="bg-gradient-to-r from-gray-800 to-black p-6 text-white">
-            <h1 className="text-3xl font-bold mb-4">创建新攻略</h1>
-            <p className="text-gray-300 mb-8">分享你的旅行经验，帮助他人探索世界</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* 顶部进度条 */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-8 px-6 shadow-md">
+        <div className="container mx-auto">
+          <h1 className="text-3xl font-bold flex items-center">
+            <DocumentTextIcon className="h-8 w-8 mr-2" />
+            创建新攻略
+          </h1>
+          <p className="text-blue-100">分享你的旅行经验，帮助他人探索世界</p>
+        </div>
+      </div>
+
+      {/* 步骤条 */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div className="py-4 px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+            <h2 className="text-2xl font-bold mb-4">创建新攻略</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">分享你的旅行经验，帮助他人探索世界</p>
             
-            {/* 步骤条 */}
+            {/* 步骤指示器 */}
             <div className="relative mb-12">
-              {/* 步骤指示器 */}
+              {/* 步骤条 */}
               <div className="flex justify-between items-center relative z-10">
                 {steps.map((step, index) => (
                   <motion.div 
@@ -336,19 +356,14 @@ const NewGuide = () => {
                         />
                       )}
                     </motion.button>
-                    <motion.div 
-                      className="flex flex-col items-center"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 + index * 0.1 }}
-                    >
+                    <div className="flex flex-col items-center">
                       <span className={`font-medium ${activeStep >= index ? 'text-white' : 'text-gray-400'}`}>
                         {step.name}
                       </span>
                       <span className={`text-xs mt-1 ${activeStep >= index ? 'text-gray-300' : 'text-gray-500'}`}>
                         {step.description}
                       </span>
-                    </motion.div>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -400,8 +415,7 @@ const NewGuide = () => {
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white drop-shadow-lg">
                   <path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path>
-                  <path d="M4 15V4a1 1 0 0 1 1-1h3v7" />
-                  <path d="M9 3h10l3 7" />
+                  <path d="M4 14.5c.84-1.32 2.51-1.48 4-1 1.84-3 6.13-2.82 7 1 2.22.55 3.6 2.13 3.71 3.5"></path>
                   <line x1="2" y1="19" x2="22" y2="19" />
                 </svg>
                 {/* 小波纹效果 */}
@@ -433,7 +447,7 @@ const NewGuide = () => {
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              key={activeStep} // 确保每次切换都会重新动画
+              key={activeStep} // 确保动画重新渲染
               className="text-center text-sm text-gray-300 italic mt-2"
             >
               {activeStep === 0 && (
@@ -442,7 +456,7 @@ const NewGuide = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
                 >
-                  请填写攻略标题和封面图片
+                  请输入攻略标题和封面图片
                 </motion.span>
               )}
               {activeStep === 1 && (
@@ -470,73 +484,135 @@ const NewGuide = () => {
             {/* 步骤 1: 基本信息 */}
             {activeStep === 0 && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
+                className="p-8"
               >
-                <h2 className="text-2xl font-semibold mb-6 text-gray-800">基本信息</h2>
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">基本信息</h2>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">设置您的攻略标题和封面图片</p>
+                </div>
+                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      攻略标题 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={guide.title}
-                      onChange={handleTitleChange}
-                      placeholder="例如：巴厘岛深度游 - 10天完美行程"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                    <p className="mt-2 text-sm text-gray-500">
-                      一个好的标题能吸引更多读者，建议包含目的地和行程天数
-                    </p>
+                    <div className="mb-6">
+                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        攻略标题 <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative rounded-md shadow-sm">
+                        <input
+                          type="text"
+                          id="title"
+                          className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white pl-4 pr-12 py-3 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="例如：巴厘岛深度游 - 10天玩遍行程"
+                          value={guide.title}
+                          onChange={handleTitleChange}
+                          required
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <PencilSquareIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        一个好的标题能引起更多关注，建议使用目的地、简述、行程天数等
+                      </p>
+                    </div>
                   </div>
                   
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      封面图片 <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-grow">
-                        <div className="relative">
+                    <div className="mb-6">
+                      <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        封面图片 <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative rounded-md shadow-sm">
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm">
+                            <LinkIcon className="h-5 w-5 text-blue-500" />
+                          </span>
                           <input
                             type="text"
+                            id="image"
+                            className="block w-full rounded-none rounded-r-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white pl-3 pr-12 py-3 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                            placeholder="输入图片URL地址"
                             value={guide.mainImage}
                             onChange={handleImageChange}
-                            placeholder="输入图片URL地址"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pl-10"
+                            required
                           />
-                          <PhotoIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                         </div>
                       </div>
                     </div>
                     
                     {/* 图片预览 */}
                     {previewImage ? (
-                      <div className="mt-4 relative rounded-lg overflow-hidden group">
-                        <img 
-                          src={previewImage} 
-                          alt="封面预览" 
-                          className="w-full h-48 object-cover rounded-lg"
-                          onError={() => setPreviewImage('')}
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                      <div className="mt-4 relative rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                        <div className="bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 p-1 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                          <span className="text-sm text-gray-500 dark:text-gray-400 pl-2 flex items-center">
+                            <PhotoIcon className="h-4 w-4 mr-1" /> 封面预览
+                          </span>
                           <button 
                             onClick={() => setPreviewImage('')}
-                            className="opacity-0 group-hover:opacity-100 bg-white p-2 rounded-full"
+                            className="text-gray-500 hover:text-gray-700 p-1 rounded-md"
+                            title="移除图片"
                           >
-                            <XMarkIcon className="h-5 w-5 text-gray-700" />
+                            <XMarkIcon className="h-4 w-4" />
                           </button>
+                        </div>
+                        <div className="aspect-w-16 aspect-h-9 bg-gray-50 dark:bg-gray-900">
+                          <img 
+                            src={previewImage} 
+                            alt="封面预览" 
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              console.error('图片加载失败:', previewImage);
+                              e.currentTarget.onerror = null; 
+                              e.currentTarget.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width="800" height="450" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="800" height="450" fill="%23f5f5f5"%3E%3C/rect%3E%3Cg%3E%3Ctext x="50%" y="45%" font-family="Arial" font-size="24" text-anchor="middle" fill="%23999"%3E图片加载失败%3C/text%3E%3Ctext x="50%" y="55%" font-family="Arial" font-size="16" text-anchor="middle" fill="%23999"%3E请检查URL地址是否有效且支持跨域访问%3C/text%3E%3C/g%3E%3C/svg%3E';
+                            }}
+                          />
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                        <PhotoIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500">输入URL后将显示图片预览</p>
+                      <div className="mt-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center bg-white dark:bg-gray-800">
+                        <div className="py-4">
+                          <PhotoIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-gray-600 dark:text-gray-300 font-medium">
+                            输入URL后将显示图片预览
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto">
+                            请确保图片URL有效且支持跨域访问<br />
+                            推荐尺寸：1600×900像素（16:9比例）
+                          </p>
+                          <div className="mt-4 text-xs text-blue-500">
+                            <a href="https://unsplash.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:underline">
+                              <LinkIcon className="h-3 w-3 mr-1" /> 从Unsplash查找免费图片
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
+                </div>
+                
+                <div className="mt-8 flex justify-between">
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                  >
+                    <ArrowLeftIcon className="-ml-1 mr-2 h-5 w-5" />
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="inline-flex items-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!guide.title || !guide.mainImage}
+                  >
+                    下一步
+                    <ArrowRightIcon className="ml-2 -mr-1 h-5 w-5" />
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -565,8 +641,8 @@ const NewGuide = () => {
                         className={`px-4 py-2 rounded-full flex items-center ${
                           guide.tags.includes(tag)
                             ? 'bg-black text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                        } transition-colors shadow-sm`}
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        } transition-colors`}
                       >
                         {guide.tags.includes(tag) && (
                           <CheckIcon className="h-4 w-4 mr-1" />
@@ -593,7 +669,7 @@ const NewGuide = () => {
                 </div>
               </motion.div>
             )}
-
+            
             {/* 步骤 3: 内容编辑 */}
             {activeStep === 2 && (
               <motion.div
@@ -614,11 +690,7 @@ const NewGuide = () => {
                   <div className="flex space-x-3 mt-4 md:mt-0">
                     <button
                       onClick={() => setIsPreviewMode(!isPreviewMode)}
-                      className={`flex items-center px-3 py-1.5 rounded-md border transition-colors ${
-                        isPreviewMode 
-                          ? 'bg-black text-white border-black' 
-                          : 'text-gray-700 border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded-md hover:bg-blue-50 transition-colors`}
                     >
                       <DocumentTextIcon className="h-4 w-4 mr-1" />
                       {isPreviewMode ? '编辑模式' : '预览模式'}
@@ -630,17 +702,14 @@ const NewGuide = () => {
                       className="flex items-center bg-black text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm"
                     >
                       <PlusCircleIcon className="h-4 w-4 mr-1" />
-                      添加章节
+                      添加新章节
                     </motion.button>
                   </div>
                 </div>
 
                 {guide.content.map((section, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
                     className="mb-8 border border-gray-200 rounded-lg overflow-hidden"
                   >
                     {/* 章节标题 */}
@@ -784,7 +853,7 @@ const NewGuide = () => {
                               title="有序列表"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h10M7 16h10M3 8h.01M3 12h.01M3 16h.01" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h10M7 16h10" />
                               </svg>
                             </button>
                           </div>
@@ -881,7 +950,7 @@ const NewGuide = () => {
                         </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
 
                 {/* 底部工具栏 */}
@@ -913,12 +982,14 @@ const NewGuide = () => {
             )}
 
             {/* 导航按钮 */}
-            <div className="mt-8 flex justify-between">
+            <div className="mt-12 flex justify-between">
               <button
-                onClick={activeStep === 0 ? () => navigate('/guides') : prevStep}
-                className="px-6 py-3 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
+                onClick={prevStep}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors shadow-sm flex items-center"
+                style={{ visibility: activeStep > 0 ? 'visible' : 'hidden' }}
               >
-                {activeStep === 0 ? '取消' : '上一步'}
+                <ArrowLeftIcon className="h-5 w-5 mr-1" />
+                上一步
               </button>
               
               {activeStep < 2 ? (
@@ -958,7 +1029,7 @@ const NewGuide = () => {
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

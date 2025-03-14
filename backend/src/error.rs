@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use thiserror::Error;
 use warp::{reject::Reject, Rejection, Reply, http::StatusCode};
 use serde_json::json;
