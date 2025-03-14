@@ -112,16 +112,35 @@ const NewGuide = () => {
     return true;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return;
     
     setIsSaving(true);
-    // 模拟保存到服务器
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      // 调用后端 API 保存攻略数据
+      const response = await fetch('http://localhost:8080/api/guides', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(guide),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`保存失败，状态码: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('攻略保存成功:', data);
+      
       // 保存成功后跳转到攻略列表页
       navigate('/guides');
-    }, 1000);
+    } catch (error) {
+      console.error('保存攻略失败:', error);
+      alert('保存攻略失败，请稍后重试');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const nextStep = () => {
