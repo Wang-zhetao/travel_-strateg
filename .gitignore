@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Rust
+Cargo.lock
 /target
 **/*.rs.bk
-Cargo.lock
 .env

@@ -1,3 +1,6 @@
+fn main() {
+    println!("Hello, world!");
+}
 mod models;
 mod handlers;
 mod routes;
