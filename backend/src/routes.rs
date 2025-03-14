@@ -1,4 +1,4 @@
-use warp::{Filter, filters::BoxedFilter, reject, Reply};
+use warp::{Filter, filters::BoxedFilter, Reply};
 use uuid::Uuid;
 
 use crate::handlers;
